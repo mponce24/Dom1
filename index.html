@@ -201,11 +201,17 @@
             x: {
               min: -20,
               max: 20,
+              ticks: {
+                stepSize: 2
+              },
               title: { display: true, text: 'x' }
             },
             y: {
               min: -20,
               max: 20,
+              ticks: {
+                stepSize: 2
+              },
               title: { display: true, text: 'f(x)' }
             }
           }
@@ -225,7 +231,7 @@
         voz.pitch = tono;
         voz.volume = 1;
 
-        speechSynthesis.cancel(); // Detiene lectura previa
+        speechSynthesis.cancel(); // Detener cualquier voz previa
         speechSynthesis.speak(voz);
       } else {
         alert('❌ Tu navegador no soporta síntesis de voz o no hay texto para leer.');
@@ -234,5 +240,4 @@
   </script>
 </body>
 </html>
-
 
