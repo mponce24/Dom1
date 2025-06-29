@@ -22,7 +22,7 @@
       text-shadow: 1px 1px 4px #000;
     }
 
-    input, button {
+    input, button, select {
       font-size: 1rem;
       padding: 0.5rem;
       margin: 0.3rem;
@@ -56,6 +56,13 @@
       border-radius: 8px;
       max-width: 600px;
     }
+
+    .voz-config {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -63,7 +70,22 @@
 
   <input id="ecuacion" type="text" placeholder="Ej: 1/2x^2 - 3/4x + 1" />
   <button onclick="resolver()">Resolver y Graficar</button>
-  <button onclick="leerResultado()">🔊 Escuchar Resultado</button>
+
+  <div class="voz-config">
+    <label for="idioma">Idioma:</label>
+    <select id="idioma">
+      <option value="es-ES">Español (es-ES)</option>
+      <option value="en-US">Inglés (en-US)</option>
+    </select>
+
+    <label for="velocidad">Velocidad:</label>
+    <input type="range" id="velocidad" min="0.5" max="2" step="0.1" value="1" />
+
+    <label for="tono">Tono:</label>
+    <input type="range" id="tono" min="0.5" max="2" step="0.1" value="1" />
+
+    <button onclick="leerResultado()">🔊 Escuchar Resultado</button>
+  </div>
 
   <div id="resultado"></div>
   <canvas id="grafico" width="600" height="400"></canvas>
@@ -193,14 +215,24 @@
 
     function leerResultado() {
       if ('speechSynthesis' in window && textoResultado) {
+        const idioma = document.getElementById('idioma').value;
+        const velocidad = parseFloat(document.getElementById('velocidad').value);
+        const tono = parseFloat(document.getElementById('tono').value);
+
         const voz = new SpeechSynthesisUtterance(textoResultado);
-        voz.lang = 'es-ES';
+        voz.lang = idioma;
+        voz.rate = velocidad;
+        voz.pitch = tono;
+        voz.volume = 1;
+
+        speechSynthesis.cancel(); // Detiene lectura previa
         speechSynthesis.speak(voz);
       } else {
-        alert('Tu navegador no soporta texto a voz.');
+        alert('❌ Tu navegador no soporta síntesis de voz o no hay texto para leer.');
       }
     }
   </script>
 </body>
 </html>
+
 
