@@ -178,7 +178,7 @@
     function graficar(a, b, c) {
       const ctx = document.getElementById('grafico').getContext('2d');
       const x = [], y = [];
-      for (let i = -20; i <= 20; i += 0.2) {
+      for (let i = -20; i <= 20; i++) {
         x.push(i);
         y.push(a * i * i + b * i + c);
       }
@@ -202,7 +202,10 @@
               min: -20,
               max: 20,
               ticks: {
-                stepSize: 1
+                stepSize: 2,
+                callback: function(value) {
+                  return Number.isInteger(value) ? value : null;
+                }
               },
               title: { display: true, text: 'x' }
             },
@@ -210,7 +213,7 @@
               min: -20,
               max: 20,
               ticks: {
-                stepSize: 1
+                stepSize: 2
               },
               title: { display: true, text: 'f(x)' }
             }
