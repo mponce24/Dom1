@@ -3,297 +3,188 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Solucionador y Graficador de Ecuaciones</title>
+  <title>Solucionador de Ecuaciones</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      margin: 0;
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
-      font-family: 'Inter', sans-serif;
-      color: #f0f0f0;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #2193b0, #6dd5ed);
+      color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-      padding: 2rem 1rem;
+      padding: 2rem;
     }
 
     h1 {
-      font-weight: 700;
-      font-size: 2.5rem;
+      font-size: 2rem;
       margin-bottom: 1rem;
-      text-shadow: 0 0 8px rgba(0,0,0,0.3);
-      user-select: none;
+      text-shadow: 1px 1px 4px #000;
     }
 
-    .input-container {
-      display: flex;
-      width: 100%;
-      max-width: 600px;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    input[type="text"] {
-      flex-grow: 1;
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
+    input, button {
+      font-size: 1rem;
+      padding: 0.5rem;
+      margin: 0.3rem;
       border: none;
-      font-size: 1.1rem;
-      outline: none;
-      box-shadow: 0 0 10px rgba(255,255,255,0.2);
-      background: rgba(255 255 255 / 0.1);
-      color: #fff;
-      transition: background 0.3s ease;
+      border-radius: 8px;
     }
-    input[type="text"]:focus {
-      background: rgba(255 255 255 / 0.25);
-      box-shadow: 0 0 15px #fff;
+
+    input {
+      width: 300px;
     }
 
     button {
-      padding: 0 1.5rem;
-      border-radius: 10px;
-      border: none;
-      font-size: 1.1rem;
-      font-weight: 700;
+      background-color: #ff6f61;
+      color: #fff;
       cursor: pointer;
-      background: #ff416c;
-      background: linear-gradient(45deg, #ff416c, #ff4b2b);
-      color: white;
-      box-shadow: 0 8px 15px rgba(255, 65, 108, 0.4);
-      transition: background 0.3s ease, box-shadow 0.3s ease;
-      user-select: none;
-    }
-    button:hover {
-      background: linear-gradient(45deg, #ff4b2b, #ff416c);
-      box-shadow: 0 12px 20px rgba(255, 75, 43, 0.6);
     }
 
     #resultado {
-      background: rgba(255 255 255 / 0.1);
-      box-shadow: 0 0 15px rgba(255 255 255 / 0.3);
-      border-radius: 15px;
-      padding: 1.5rem 2rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 1rem;
       margin-top: 1rem;
-      width: 100%;
       max-width: 600px;
-      font-size: 1.15rem;
-      line-height: 1.6;
-      min-height: 130px;
-      user-select: text;
+      width: 100%;
+      color: white;
     }
 
     canvas {
       margin-top: 2rem;
-      border-radius: 15px;
-      background: #fff;
+      background-color: #fff;
+      border-radius: 8px;
       max-width: 600px;
-      width: 100%;
-      height: 400px !important;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    }
-
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 2rem;
-      }
-      #resultado {
-        font-size: 1rem;
-        padding: 1rem 1.2rem;
-      }
-      .input-container {
-        flex-direction: column;
-      }
-      button {
-        width: 100%;
-      }
     }
   </style>
 </head>
 <body>
   <h1>Solucionador y Graficador de Ecuaciones</h1>
 
-  <div class="input-container">
-    <input
-      id="ecuacion"
-      type="text"
-      placeholder="Ejemplo: 1/2x^2 - 3/4x + 1"
-      autocomplete="off"
-      spellcheck="false"
-    />
-    <button onclick="resolver()">Resolver y Graficar</button>
-  </div>
-
-  <button style="max-width:600px; width:100%; margin-bottom: 1rem; background:#00c853; box-shadow:0 8px 15px rgba(0,200,83,0.4);" onclick="leerResultado()">
-    🔊 Escuchar Resultado
-  </button>
+  <input id="ecuacion" type="text" placeholder="Ej: 1/2x^2 - 3/4x + 1" />
+  <button onclick="resolver()">Resolver y Graficar</button>
+  <button onclick="leerResultado()">🔊 Escuchar Resultado</button>
 
   <div id="resultado"></div>
-  <canvas id="grafico"></canvas>
+  <canvas id="grafico" width="600" height="400"></canvas>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    let grafico;
     let textoResultado = '';
+    let grafico = null;
+
+    function convertirFracciones(expr) {
+      return expr.replace(/(\d+)\/(\d+)/g, (_, num, den) => `(${parseFloat(num) / parseFloat(den)})`);
+    }
 
     function resolver() {
       const input = document.getElementById('ecuacion').value.trim();
-      const resultadoDiv = document.getElementById('resultado');
-      const ctx = document.getElementById('grafico').getContext('2d');
-
+      const resultado = document.getElementById('resultado');
       if (!input) {
-        resultadoDiv.innerHTML = '<p style="color:#ff8a80;">Por favor ingresa una ecuación válida.</p>';
-        textoResultado = '';
-        if (grafico) grafico.destroy();
+        resultado.innerHTML = "Por favor, ingresa una ecuación.";
         return;
       }
 
-      // Función para convertir fracciones (como "3/4") a decimales
-      function convertirFracciones(expr) {
-        return expr.replace(/(-?\d+\/\d+)/g, (match) => {
-          const [num, den] = match.split('/');
-          return `(${parseFloat(num) / parseFloat(den)})`;
-        });
-      }
+      let expr = convertirFracciones(input.replace(/\^/g, '**'));
+      let a = obtenerCoef(expr, 'x\\*\\*2');
+      let b = obtenerCoef(expr, '(?<!\\*)x(?!\\*)');
+      let c = obtenerConst(expr);
 
-      // Convertir potencias ^ a **
-      let expr = input.replace(/\^/g, '**');
-      expr = convertirFracciones(expr);
-
-      // Funciones para extraer coeficientes y constantes:
-      function obtenerCoeficiente(expr, variableRegex) {
-        const re = new RegExp(`([+-]?\\(?[\\d\\.]+\\)?)*\\*?${variableRegex}`);
-        const match = expr.match(re);
-        if (!match) return 0;
-        let val = match[1];
-        if (!val || val === '+' || val === '') return 1;
-        if (val === '-') return -1;
-        try {
-          return eval(val);
-        } catch {
-          return parseFloat(val) || 0;
-        }
-      }
-
-      function obtenerConstante(expr) {
-        // Quitar términos con x o x**2
-        const sinX = expr.replace(/([+-]?\\(?\\d*\\.?\\d*\\)?\\*?x(\\*\\*\\d+)?)/g, '');
-        const matches = sinX.match(/[-+]?\d*\.?\d+/g);
-        if (!matches) return 0;
-        return matches.map(Number).reduce((a, b) => a + b, 0);
-      }
-
-      // Ajuste regex para coeficientes para que detecte variables x**2 y x correctamente
-      const a = obtenerCoeficiente(expr, 'x\\*\\*2');
-      const b = obtenerCoeficiente(expr, '(?<!\\*)x(?!\\*)');
-      const c = obtenerConstante(expr);
-
-      // Validar tipo
-      const tipo = a !== 0 ? 'Cuadrática' : 'Lineal';
-      const dominio = 'Todos los números reales (-∞, ∞)';
-      let rango = '';
-      let solucion = '';
+      let tipo = a !== 0 ? 'Cuadrática' : 'Lineal';
+      let dom = "Todos los números reales (−∞, ∞)";
+      let ran = "";
+      let sol = "";
 
       if (tipo === 'Cuadrática') {
-        const discriminante = b * b - 4 * a * c;
-        const verticeX = -b / (2 * a);
-        const verticeY = a * verticeX * verticeX + b * verticeX + c;
-        rango = a > 0 ? `[${verticeY.toFixed(3)}, ∞)` : `(-∞, ${verticeY.toFixed(3)}]`;
+        const disc = b*b - 4*a*c;
+        const vx = -b / (2*a);
+        const vy = a * vx * vx + b * vx + c;
+        ran = a > 0 ? `[${vy.toFixed(2)}, ∞)` : `(−∞, ${vy.toFixed(2)}]`;
 
-        if (discriminante > 0) {
-          const x1 = (-b + Math.sqrt(discriminante)) / (2 * a);
-          const x2 = (-b - Math.sqrt(discriminante)) / (2 * a);
-          solucion = `Soluciones reales: x₁ = ${x1.toFixed(3)}, x₂ = ${x2.toFixed(3)}`;
-        } else if (discriminante === 0) {
-          const x = -b / (2 * a);
-          solucion = `Solución única: x = ${x.toFixed(3)}`;
+        if (disc > 0) {
+          const x1 = (-b + Math.sqrt(disc)) / (2*a);
+          const x2 = (-b - Math.sqrt(disc)) / (2*a);
+          sol = `x₁ = ${x1.toFixed(2)}, x₂ = ${x2.toFixed(2)}`;
+        } else if (disc === 0) {
+          const x = -b / (2*a);
+          sol = `x = ${x.toFixed(2)} (doble raíz)`;
         } else {
-          const real = (-b / (2 * a)).toFixed(3);
-          const imag = (Math.sqrt(-discriminante) / (2 * a)).toFixed(3);
-          solucion = `Soluciones complejas: ${real} ± ${imag}i`;
+          const real = (-b / (2*a)).toFixed(2);
+          const imag = (Math.sqrt(-disc) / (2*a)).toFixed(2);
+          sol = `x = ${real} ± ${imag}i (raíces complejas)`;
         }
+
+        textoResultado = `La función es cuadrática. Dominio: ${dom}. Rango: ${ran}. Solución: ${sol}.`;
+
       } else {
-        // Lineal
-        if (b === 0) {
-          if (c === 0) solucion = 'Solución infinita (0 = 0)';
-          else solucion = 'No tiene solución';
-        } else {
+        ran = dom;
+        if (b !== 0) {
           const x = -c / b;
-          solucion = `Solución: x = ${x.toFixed(3)}`;
+          sol = `x = ${x.toFixed(2)}`;
+          textoResultado = `La función es lineal. Dominio y rango: ${dom}. Solución: ${sol}.`;
+        } else {
+          sol = c === 0 ? "Solución infinita (identidad)" : "Sin solución";
+          textoResultado = `Ecuación constante. Resultado: ${sol}.`;
         }
-        rango = 'Todos los números reales (-∞, ∞)';
       }
 
-      textoResultado = `Tipo: ${tipo}. Dominio: ${dominio}. Rango: ${rango}. ${solucion}.`;
-
-      resultadoDiv.innerHTML = `
+      resultado.innerHTML = `
         <p><strong>Tipo:</strong> ${tipo}</p>
-        <p><strong>Dominio:</strong> ${dominio}</p>
-        <p><strong>Rango:</strong> ${rango}</p>
-        <p><strong>${solucion}</strong></p>
+        <p><strong>Dominio:</strong> ${dom}</p>
+        <p><strong>Rango:</strong> ${ran}</p>
+        <p><strong>Solución:</strong> ${sol}</p>
       `;
 
-      // Graficar la función
-      const xs = [];
-      const ys = [];
-      for (let i = -20; i <= 20; i += 0.1) {
-        xs.push(i);
-        ys.push(a * i * i + b * i + c);
+      graficar(a, b, c);
+    }
+
+    function obtenerCoef(expr, variable) {
+      const re = new RegExp(`([+-]?[\\d\\.]*?)\\*?${variable}`);
+      const match = expr.match(re);
+      if (!match) return 0;
+      let val = match[1];
+      if (val === "" || val === "+") return 1;
+      if (val === "-") return -1;
+      return parseFloat(val);
+    }
+
+    function obtenerConst(expr) {
+      const exprSinX = expr.replace(/[-+]?[.\d]*\*?x(\*\*2)?/g, '');
+      const matches = exprSinX.match(/[-+]?\d*\.?\d+/g);
+      return matches ? matches.map(Number).reduce((a, b) => a + b, 0) : 0;
+    }
+
+    function graficar(a, b, c) {
+      const ctx = document.getElementById('grafico').getContext('2d');
+      const x = [], y = [];
+      for (let i = -20; i <= 20; i += 0.2) {
+        x.push(i);
+        y.push(a * i * i + b * i + c);
       }
 
       if (grafico) grafico.destroy();
       grafico = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: xs,
+          labels: x,
           datasets: [{
             label: 'f(x)',
-            data: ys,
-            borderColor: '#00c853',
-            borderWidth: 3,
+            data: y,
+            borderColor: 'blue',
             fill: false,
-            pointRadius: 0,
-            tension: 0.3,
+            pointRadius: 0
           }]
         },
         options: {
-          responsive: true,
           scales: {
             x: {
               min: -20,
               max: 20,
-              title: { display: true, text: 'x' },
-              grid: { color: '#ccc' },
-              ticks: {
-                color: '#444',
-                font: { weight: 'bold' }
-              }
+              title: { display: true, text: 'x' }
             },
             y: {
               min: -20,
               max: 20,
-              title: { display: true, text: 'f(x)' },
-              grid: { color: '#ccc' },
-              ticks: {
-                color: '#444',
-                font: { weight: 'bold' }
-              }
-            }
-          },
-          plugins: {
-            legend: { display: false },
-            title: {
-              display: true,
-              text: 'Gráfica de la función',
-              color: '#222',
-              font: { size: 18, weight: 'bold' }
+              title: { display: true, text: 'f(x)' }
             }
           }
         }
@@ -301,16 +192,12 @@
     }
 
     function leerResultado() {
-      if (!textoResultado) {
-        alert('No hay resultado para leer.');
-        return;
-      }
-      if ('speechSynthesis' in window) {
+      if ('speechSynthesis' in window && textoResultado) {
         const voz = new SpeechSynthesisUtterance(textoResultado);
         voz.lang = 'es-ES';
         speechSynthesis.speak(voz);
       } else {
-        alert('Tu navegador no soporta síntesis de voz.');
+        alert('Tu navegador no soporta texto a voz.');
       }
     }
   </script>
