@@ -1,1 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resolver Ecuaciones Lineales y Cuadráticas</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background: #f9f9f9;
+    }
+    input, button {
+      font-size: 1rem;
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+    #resultado {
+      background: white;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      max-width: 420px;
+    }
+    canvas {
+      margin-top: 1rem;
+      max-width: 600px;
+      max-height: 400px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Solucionador y Graficador de Ecuaciones</h1>
+  <p>Ingresa la ecuación en formato estándar (ejemplo: <code>1/2x^2 - 3/4x + 1</code> o <code>2x - 4</code>)</p>
+  <input id="ecuacion" type="text" placeholder="Ejemplo: 1/2x^2 - 3/4x + 1" />
+  <button onclick="resolver()">Resolver y Graficar</button>
+
+  <div id="resultado"></div>
+  <canvas id="grafico"></canvas>
+
+  <script>
+    let grafico;
+
+    function resolver() {
+      const input = document.getElementById('ecuacion').value.trim();
+      const resultadoDiv = document.getElementById('resultado');
+      const ctx = document.getElementById('grafico').getContext('2d');
+
+      if (!input) {
+        resultadoDiv.innerHTML = '<p style="color:red;">Por favor ingresa una ecuación válida.</p>';
+        return;
+      }
+
+      // Convertir fracciones a decimal en toda la expresión
+      let expr = input.replace(/\^/g, '**');
+      expr = expr.replace(/(-?\d+\/\d+)/g, (match) => {
+        const [num, den] = match.split('/');
+        return `(${parseFloat(num) / parseFloat(den)})`;
+      });
+
+      // Obtener coeficientes a, b, c
+      const a = obtenerCoef(expr, 'x\\*\\*2');
+      const b = obtenerCoef(expr, '(?<!\\*)x(?!\\*)');
+      const c = obtenerConstante(expr);
+
+      // Tipo de ecuación
+      const tipo = a !== 0 ? 'Cuadrática' : 'Lineal';
+
+      // Resolver ecuación
+      let solucion = '';
+      let dominio = 'Todos los números reales (-∞, ∞)';
+      let rango = '';
+
+      if (tipo === 'Cuadrática') {
+        const discriminante = b*b - 4*a*c;
+        const verticeX = -b/(2*a);
+        const verticeY = a*verticeX*verticeX + b*verticeX + c;
+        rango = a > 0 ? `[${verticeY.toFixed(2)}, ∞)` : `(-∞, ${verticeY.toFixed(2)}]`;
+
+        if (discriminante > 0) {
+          const x1 = (-b + Math.sqrt(discriminante)) / (2*a);
+          const x2 = (-b - Math.sqrt(discriminante)) / (2*a);
+          solucion = `Soluciones reales: x₁ = ${x1.toFixed(3)}, x₂ = ${x2.toFixed(3)}`;
+        } else if (discriminante === 0) {
+          const x = -b / (2*a);
+          solucion = `Solución única: x = ${x.toFixed(3)}`;
+        } else {
+          const real = (-b / (2*a)).toFixed(3);
+          const imag = (Math.sqrt(-discriminante) / (2*a)).toFixed(3);
+          solucion = `Soluciones complejas: ${real} ± ${imag}i`;
+        }
+      } else {
+        if (b === 0) {
+          if (c === 0) solucion = 'Solución infinita (0=0)';
+          else solucion = 'No tiene solución';
+        } else {
+          const x = -c / b;
+          solucion = `Solución: x = ${x.toFixed(3)}`;
+        }
+        rango = 'Todos los números reales (-∞, ∞)';
+      }
+
+      resultadoDiv.innerHTML = `
+        <h2>${tipo}</h2>
+        <p><strong>Dominio:</strong> ${dominio}</p>
+        <p><strong>Rango:</strong> ${rango}</p>
+        <p><strong>${solucion}</strong></p>
+      `;
+
+      // Graficar
+      const xs = [];
+      const ys = [];
+      for (let i = -20; i <= 20; i += 0.1) {
+        xs.push(i);
+        ys.push(a*i*i + b*i + c);
+      }
+
+      if (grafico) grafico.destroy();
+      grafico = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: xs,
+          datasets: [{
+            label: 'f(x)',
+            data: ys,
+            borderColor: 'blue',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              min: -20,
+              max: 20,
+              title: { display: true, text: 'x' },
+              grid: { color: '#ccc' }
+            },
+            y: {
+              min: -20,
+              max: 20,
+              title: { display: true, text: 'f(x)' },
+              grid: { color: '#ccc' }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: 'Gráfica de la función'
+            }
+          }
+        }
+      });
+    }
+
+    // Función para extraer coeficiente del término con variable especificada
+    function obtenerCoef(expr, variableRegex) {
+      const re = new RegExp('([-+]?[\\d\\.()]*?)\\*?' + variableRegex);
+      const match = expr.match(re);
+      if (!match) return 0;
+      let val = match[1];
+      if (val === '' || val === '+') return 1;
+      if (val === '-') return -1;
+      // evaluar expresion si está entre paréntesis
+      try {
+        return eval(val);
+      } catch {
+        return parseFloat(val) || 0;
+      }
+    }
+
+    // Función para obtener la constante (término sin x)
+    function obtenerConstante(expr) {
+      // Eliminar términos con x
+      let exprSinX = expr.replace(/[-+]?[\\d\\.()]*\\*?x(\\*\\*\\d+)?/g, '');
+      // Extraer números (constantes)
+      const matches = exprSinX.match(/[-+]?\\d*\\.?\\d+/g);
+      if (!matches) return 0;
+      return matches.map(Number).reduce((a,b) => a + b, 0);
+    }
+  </script>
+</body>
+</html>
 
