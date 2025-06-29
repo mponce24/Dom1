@@ -6,85 +6,139 @@
   <title>Solucionador y Graficador de Ecuaciones</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: #fff;
       margin: 0;
-      padding: 2rem;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      font-family: 'Inter', sans-serif;
+      color: #f0f0f0;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
-      box-sizing: border-box;
+      padding: 2rem 1rem;
     }
+
     h1 {
+      font-weight: 700;
+      font-size: 2.5rem;
       margin-bottom: 1rem;
-      text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
-    }
-    #ecuacion {
-      width: 100%;
-      max-width: 480px;
-      padding: 0.75rem 1rem;
-      font-size: 1.1rem;
-      border-radius: 8px;
-      border: none;
-      box-shadow: 0 0 8px rgba(0,0,0,0.2);
-      margin-bottom: 1rem;
-      outline: none;
-    }
-    button {
-      cursor: pointer;
-      font-size: 1.1rem;
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      margin: 0.5rem 0;
-      width: 100%;
-      max-width: 480px;
-      background: #ff6f61;
-      color: white;
-      font-weight: 600;
-      box-shadow: 0 4px 10px rgba(255,111,97,0.5);
-      transition: background 0.3s ease;
-    }
-    button:hover {
-      background: #ff3b2f;
-      box-shadow: 0 6px 14px rgba(255,59,47,0.7);
-    }
-    #resultado {
-      background: rgba(255 255 255 / 0.15);
-      max-width: 480px;
-      width: 100%;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-      margin-top: 1rem;
-      line-height: 1.5;
-      font-size: 1.1rem;
-      min-height: 110px;
+      text-shadow: 0 0 8px rgba(0,0,0,0.3);
       user-select: none;
     }
+
+    .input-container {
+      display: flex;
+      width: 100%;
+      max-width: 600px;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    input[type="text"] {
+      flex-grow: 1;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: none;
+      font-size: 1.1rem;
+      outline: none;
+      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+      background: rgba(255 255 255 / 0.1);
+      color: #fff;
+      transition: background 0.3s ease;
+    }
+    input[type="text"]:focus {
+      background: rgba(255 255 255 / 0.25);
+      box-shadow: 0 0 15px #fff;
+    }
+
+    button {
+      padding: 0 1.5rem;
+      border-radius: 10px;
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: #ff416c;
+      background: linear-gradient(45deg, #ff416c, #ff4b2b);
+      color: white;
+      box-shadow: 0 8px 15px rgba(255, 65, 108, 0.4);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      user-select: none;
+    }
+    button:hover {
+      background: linear-gradient(45deg, #ff4b2b, #ff416c);
+      box-shadow: 0 12px 20px rgba(255, 75, 43, 0.6);
+    }
+
+    #resultado {
+      background: rgba(255 255 255 / 0.1);
+      box-shadow: 0 0 15px rgba(255 255 255 / 0.3);
+      border-radius: 15px;
+      padding: 1.5rem 2rem;
+      margin-top: 1rem;
+      width: 100%;
+      max-width: 600px;
+      font-size: 1.15rem;
+      line-height: 1.6;
+      min-height: 130px;
+      user-select: text;
+    }
+
     canvas {
       margin-top: 2rem;
+      border-radius: 15px;
+      background: #fff;
       max-width: 600px;
-      max-height: 400px;
       width: 100%;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-      background: white;
+      height: 400px !important;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 2rem;
+      }
+      #resultado {
+        font-size: 1rem;
+        padding: 1rem 1.2rem;
+      }
+      .input-container {
+        flex-direction: column;
+      }
+      button {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <h1>Solucionador y Graficador de Ecuaciones</h1>
-  <input id="ecuacion" type="text" placeholder="Ejemplo: 1/2x^2 - 3/4x + 1" autocomplete="off" />
-  <button onclick="resolver()">Resolver y Graficar</button>
-  <button onclick="leerResultado()" style="background:#4caf50;">🔊 Escuchar Resultado</button>
+
+  <div class="input-container">
+    <input
+      id="ecuacion"
+      type="text"
+      placeholder="Ejemplo: 1/2x^2 - 3/4x + 1"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button onclick="resolver()">Resolver y Graficar</button>
+  </div>
+
+  <button style="max-width:600px; width:100%; margin-bottom: 1rem; background:#00c853; box-shadow:0 8px 15px rgba(0,200,83,0.4);" onclick="leerResultado()">
+    🔊 Escuchar Resultado
+  </button>
 
   <div id="resultado"></div>
   <canvas id="grafico"></canvas>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     let grafico;
     let textoResultado = '';
@@ -95,141 +149,155 @@
       const ctx = document.getElementById('grafico').getContext('2d');
 
       if (!input) {
-        resultadoDiv.innerHTML = '<p style="color:#ffb3b3;">Por favor ingresa una ecuación válida.</p>';
+        resultadoDiv.innerHTML = '<p style="color:#ff8a80;">Por favor ingresa una ecuación válida.</p>';
         textoResultado = '';
-        if(grafico) grafico.destroy();
+        if (grafico) grafico.destroy();
         return;
       }
 
-      // Convertir fracciones a decimal
+      // Función para convertir fracciones (como "3/4") a decimales
+      function convertirFracciones(expr) {
+        return expr.replace(/(-?\d+\/\d+)/g, (match) => {
+          const [num, den] = match.split('/');
+          return `(${parseFloat(num) / parseFloat(den)})`;
+        });
+      }
+
+      // Convertir potencias ^ a **
       let expr = input.replace(/\^/g, '**');
-      expr = expr.replace(/(-?\d+\/\d+)/g, (match) => {
-        const [num, den] = match.split('/');
-        return `(${parseFloat(num) / parseFloat(den)})`;
-      });
+      expr = convertirFracciones(expr);
 
-      try {
-        const a = obtenerCoef(expr, 'x\\*\\*2');
-        const b = obtenerCoef(expr, '(?<!\\*)x(?!\\*)');
-        const c = obtenerConstante(expr);
+      // Funciones para extraer coeficientes y constantes:
+      function obtenerCoeficiente(expr, variableRegex) {
+        const re = new RegExp(`([+-]?\\(?[\\d\\.]+\\)?)*\\*?${variableRegex}`);
+        const match = expr.match(re);
+        if (!match) return 0;
+        let val = match[1];
+        if (!val || val === '+' || val === '') return 1;
+        if (val === '-') return -1;
+        try {
+          return eval(val);
+        } catch {
+          return parseFloat(val) || 0;
+        }
+      }
 
-        const tipo = a !== 0 ? 'Cuadrática' : 'Lineal';
-        const dominio = 'Todos los números reales (-∞, ∞)';
-        let rango = '';
-        let solucion = '';
+      function obtenerConstante(expr) {
+        // Quitar términos con x o x**2
+        const sinX = expr.replace(/([+-]?\\(?\\d*\\.?\\d*\\)?\\*?x(\\*\\*\\d+)?)/g, '');
+        const matches = sinX.match(/[-+]?\d*\.?\d+/g);
+        if (!matches) return 0;
+        return matches.map(Number).reduce((a, b) => a + b, 0);
+      }
 
-        if (tipo === 'Cuadrática') {
-          const discriminante = b*b - 4*a*c;
-          const verticeX = -b/(2*a);
-          const verticeY = a*verticeX*verticeX + b*verticeX + c;
-          rango = a > 0 ? `[${verticeY.toFixed(2)}, ∞)` : `(-∞, ${verticeY.toFixed(2)}]`;
+      // Ajuste regex para coeficientes para que detecte variables x**2 y x correctamente
+      const a = obtenerCoeficiente(expr, 'x\\*\\*2');
+      const b = obtenerCoeficiente(expr, '(?<!\\*)x(?!\\*)');
+      const c = obtenerConstante(expr);
 
-          if (discriminante > 0) {
-            const x1 = (-b + Math.sqrt(discriminante)) / (2*a);
-            const x2 = (-b - Math.sqrt(discriminante)) / (2*a);
-            solucion = `Soluciones reales: x₁ = ${x1.toFixed(3)}, x₂ = ${x2.toFixed(3)}`;
-          } else if (discriminante === 0) {
-            const x = -b / (2*a);
-            solucion = `Solución única: x = ${x.toFixed(3)}`;
-          } else {
-            const real = (-b / (2*a)).toFixed(3);
-            const imag = (Math.sqrt(-discriminante) / (2*a)).toFixed(3);
-            solucion = `Soluciones complejas: ${real} ± ${imag}i`;
-          }
+      // Validar tipo
+      const tipo = a !== 0 ? 'Cuadrática' : 'Lineal';
+      const dominio = 'Todos los números reales (-∞, ∞)';
+      let rango = '';
+      let solucion = '';
+
+      if (tipo === 'Cuadrática') {
+        const discriminante = b * b - 4 * a * c;
+        const verticeX = -b / (2 * a);
+        const verticeY = a * verticeX * verticeX + b * verticeX + c;
+        rango = a > 0 ? `[${verticeY.toFixed(3)}, ∞)` : `(-∞, ${verticeY.toFixed(3)}]`;
+
+        if (discriminante > 0) {
+          const x1 = (-b + Math.sqrt(discriminante)) / (2 * a);
+          const x2 = (-b - Math.sqrt(discriminante)) / (2 * a);
+          solucion = `Soluciones reales: x₁ = ${x1.toFixed(3)}, x₂ = ${x2.toFixed(3)}`;
+        } else if (discriminante === 0) {
+          const x = -b / (2 * a);
+          solucion = `Solución única: x = ${x.toFixed(3)}`;
         } else {
-          if (b === 0) {
-            if (c === 0) solucion = 'Solución infinita (0=0)';
-            else solucion = 'No tiene solución';
-          } else {
-            const x = -c / b;
-            solucion = `Solución: x = ${x.toFixed(3)}`;
-          }
-          rango = 'Todos los números reales (-∞, ∞)';
+          const real = (-b / (2 * a)).toFixed(3);
+          const imag = (Math.sqrt(-discriminante) / (2 * a)).toFixed(3);
+          solucion = `Soluciones complejas: ${real} ± ${imag}i`;
         }
-
-        textoResultado = `Tipo: ${tipo}. Dominio: ${dominio}. Rango: ${rango}. ${solucion}.`;
-        resultadoDiv.innerHTML = `
-          <p><strong>Tipo:</strong> ${tipo}</p>
-          <p><strong>Dominio:</strong> ${dominio}</p>
-          <p><strong>Rango:</strong> ${rango}</p>
-          <p><strong>${solucion}</strong></p>
-        `;
-
-        // Graficar función
-        const xs = [];
-        const ys = [];
-        for (let i = -20; i <= 20; i += 0.1) {
-          xs.push(i);
-          ys.push(a*i*i + b*i + c);
+      } else {
+        // Lineal
+        if (b === 0) {
+          if (c === 0) solucion = 'Solución infinita (0 = 0)';
+          else solucion = 'No tiene solución';
+        } else {
+          const x = -c / b;
+          solucion = `Solución: x = ${x.toFixed(3)}`;
         }
+        rango = 'Todos los números reales (-∞, ∞)';
+      }
 
-        if (grafico) grafico.destroy();
-        grafico = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: xs,
-            datasets: [{
-              label: 'f(x)',
-              data: ys,
-              borderColor: '#ff6f61',
-              borderWidth: 3,
-              fill: false,
-              pointRadius: 0,
-              tension: 0.2
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              x: {
-                min: -20,
-                max: 20,
-                title: { display: true, text: 'x' },
-                grid: { color: '#ccc' }
-              },
-              y: {
-                min: -20,
-                max: 20,
-                title: { display: true, text: 'f(x)' },
-                grid: { color: '#ccc' }
+      textoResultado = `Tipo: ${tipo}. Dominio: ${dominio}. Rango: ${rango}. ${solucion}.`;
+
+      resultadoDiv.innerHTML = `
+        <p><strong>Tipo:</strong> ${tipo}</p>
+        <p><strong>Dominio:</strong> ${dominio}</p>
+        <p><strong>Rango:</strong> ${rango}</p>
+        <p><strong>${solucion}</strong></p>
+      `;
+
+      // Graficar la función
+      const xs = [];
+      const ys = [];
+      for (let i = -20; i <= 20; i += 0.1) {
+        xs.push(i);
+        ys.push(a * i * i + b * i + c);
+      }
+
+      if (grafico) grafico.destroy();
+      grafico = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: xs,
+          datasets: [{
+            label: 'f(x)',
+            data: ys,
+            borderColor: '#00c853',
+            borderWidth: 3,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              min: -20,
+              max: 20,
+              title: { display: true, text: 'x' },
+              grid: { color: '#ccc' },
+              ticks: {
+                color: '#444',
+                font: { weight: 'bold' }
               }
             },
-            plugins: {
-              legend: { display: false },
-              title: {
-                display: true,
-                text: 'Gráfica de la función'
+            y: {
+              min: -20,
+              max: 20,
+              title: { display: true, text: 'f(x)' },
+              grid: { color: '#ccc' },
+              ticks: {
+                color: '#444',
+                font: { weight: 'bold' }
               }
             }
+          },
+          plugins: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: 'Gráfica de la función',
+              color: '#222',
+              font: { size: 18, weight: 'bold' }
+            }
           }
-        });
-
-      } catch(e) {
-        resultadoDiv.innerHTML = '<p style="color:#ffb3b3;">Error al analizar la ecuación. Verifica la sintaxis.</p>';
-        textoResultado = '';
-        if(grafico) grafico.destroy();
-      }
-    }
-
-    function obtenerCoef(expr, variableRegex) {
-      const re = new RegExp('([-+]?\\(?[\\d\\.]+\\)?)*\\*?' + variableRegex);
-      const match = expr.match(re);
-      if (!match) return 0;
-      let val = match[1];
-      if (!val || val === '+' || val === '') return 1;
-      if (val === '-') return -1;
-      try {
-        return eval(val);
-      } catch {
-        return parseFloat(val) || 0;
-      }
-    }
-
-    function obtenerConstante(expr) {
-      const exprSinX = expr.replace(/[-+]?\\(?\\d*\\.?\\d*\\)?\\*?x(\\*\\*\\d+)?/g, '');
-      const matches = exprSinX.match(/[-+]?\\d*\\.?\\d+/g);
-      if (!matches) return 0;
-      return matches.map(Number).reduce((a,b) => a + b, 0);
+        }
+      });
     }
 
     function leerResultado() {
@@ -248,5 +316,4 @@
   </script>
 </body>
 </html>
-
 
